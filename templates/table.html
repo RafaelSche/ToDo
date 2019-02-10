@@ -1,0 +1,58 @@
+<table style="width:100%">
+  <tr>
+    <th>ID</th>
+    <th>Name</th>
+    <th>Date_Created</th>
+    <th>Date_Deadline</th>
+    <th>Tags</th>
+  </tr>
+  {% if rows %}
+    {% for row in rows %}
+          <tr>
+    <td>
+        {% if row._id %}
+            {{row._id}}
+        {% else %}
+            -
+        {% endif %}
+    </td>
+    <td>
+        {% if row.name %}
+            {{row.name}}
+        {% else %}
+            -
+        {% endif %}
+    </td>
+    <td>
+        {% if row.date_created %}
+            {{row.date_created}}
+        {% else %}
+            -
+        {% endif %}
+    </td>
+    <td>
+        {% if row.date_deadline %}
+            {{row.date_deadline}}
+        {% else %}
+            -
+        {% endif %}
+    </td>
+    <td>
+       {% if row.tags %}
+            {{row.tags}}
+       {% else %}
+            -
+       {% endif %}
+    </td>
+  </tr>
+    {% endfor %}
+  {% else %}
+    <tr>
+        <td>None</td>
+        <td>None</td>
+        <td>None</td>
+        <td>None</td>
+        <td>None</td>
+    </tr>
+  {% endif %}
+</table>

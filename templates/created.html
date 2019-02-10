@@ -1,0 +1,32 @@
+<h1>
+{% if action %}
+    {{action}} -
+{% endif %}
+
+{% if _id %}
+    Item  {{_id}} -
+{% endif %}
+
+{% if name %}
+    {{name}}
+{% endif %}
+</h1>
+
+{% if date_created %}
+    Created - {{date_created}}
+    <br>
+{% endif %}
+
+{% if date_deadline %}
+    Deadline - {{date_deadline}}
+{% endif %}
+<br><br>
+
+{% if description %}
+    {{description}}
+    <br><br>
+{% endif %}
+
+{% if tags %}
+    Tags:  {{tags}}
+{% endif %}
