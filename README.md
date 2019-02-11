@@ -6,26 +6,29 @@ Install:
 3. Install a virtual Python Enviroment: $ python -m virtualenv env
 4. Activate the virtualenv:$ source env/bin/activate
 5. Install packages: pip install -r requirements.txt
-6. Leave the enviroment
-5. Install mongodb:  apt-get install mongodb or sudo apt-get install mongodb
+6. Install mongodb:  apt-get install mongodb or sudo apt-get install mongodb
 7. Start its daemon process: mongod
     Maybe you will have to specify another port, if default 27017 is already in use:
         sudo /etc/init.d/mongodb stop
         mongod --port <port_number>
         sudo /etc/init.d/mongodb start
+    Some configuration of the server, including the ports, is available: 
+        in line 10 - server port, in line 11 - DB port, in line 13 names of
+        the database and the collection, which will be created in MongoDB.
 8. Test mongo shell: mongo
 9. Quit mongo shell: exit
-10. Start todo: bash todo or ./todo
-11. Open 127.0.0.1:5000/ and print help in the command field or use curl
+10. Start todo: python3 app.py
+11. How to use it with curl is shown lower. It also usable with browser: 127.0.0.1:5000
 
 
-Use API with curl:
+Use the API with curl:
 
 Create a new item:
     curl -X PUT -d '{"name": "<name>",
     "description": "<description>",
     "date_deadline": "<YYYY-MM-DD>",
     "tags": [<tag1>, <tag2>, ..., <tagn>]}' "127.0.0.1:5000/create"
+All parameter in the json are optional. Attribute _id will be set by Mongo DB and date_created by the server. 
 
 List all items:
     curl -X GET -d '{}' "127.0.0.1:5000/ls"

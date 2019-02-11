@@ -61,7 +61,7 @@ def delete_one(_id):
 def view(_id):
     return dumps(db.find_one({'_id': ObjectId(_id)}, **db_names))
     
-#--------------------------------------------------------------------------------------------------------------------
+#--------------------------------------------Server HTMLs------------------------------------------------------------------------
 
 @app.route('/', methods=['POST'])
 def post(command=None):
@@ -105,6 +105,8 @@ def post(command=None):
 
     if "view" == command:
         feedback = db.find_one(args, **db_names)
+        if feedback is None:
+            feedback = {'_id': 'does noch exist'}
         ls_html_feedback = list(db.find({}, **db_names))
         return render_template(head_template, head="view") + render_template(view_template, **feedback) + render_template(table_template, rows=ls_html_feedback)
 
