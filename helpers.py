@@ -1,6 +1,7 @@
 from argparse import ArgumentParser
 from shlex import split as sh_split
 from pymongo import MongoClient as db_client
+from bson.objectid import ObjectId
 
 
 def parse_arguments(args=None):
@@ -27,14 +28,48 @@ def parse_arguments(args=None):
 class db_helper:
 
     def __init__(self, db_params):
-        self.insert_one = self.db_closure(lambda client, diction, database, collection:
-                                          client[database][collection].insert_one(diction), db_params)
-        self.delete_many = self.db_closure(lambda client, diction, database, collection:
-                                           client[database][collection].delete_many(diction), db_params)
-        self.find = self.db_closure(lambda client, diction, database, collection:
-                                    client[database][collection].find(diction), db_params)
-        self.find_one = self.db_closure(lambda client, diction, database, collection:
-                                        client[database][collection].find_one(diction), db_params)
+        self.insert_one = self.db_closure(self.insert_one, db_params)
+        self.delete_many = self.db_closure(self.delete_many, db_params)
+        self.find = self.db_closure(self.find, db_params)
+        self.find_one = self.db_closure(self.find_one, db_params)
+
+    def insert_one(self, client, diction, database, collection):
+        if "_id" in diction:
+            del diction["_id"]
+        return client[database][collection].insert_one(diction)
+
+    def delete_many(self, client, diction, database, collection):
+        if "_id" in diction:
+            diction["_id"] = ObjectId(diction["_id"])
+        if "tags" in diction:
+           self.cast_tags(diction)
+        return client[database][collection].delete_many(diction)
+
+    def find(self, client, diction, database, collection):
+        if "_id" in diction:
+            diction["_id"] = ObjectId(diction["_id"])
+        if "tags" in diction:
+           self.cast_tags(diction)
+        items = list(client[database][collection].find(diction))
+        for item in items:
+            item['_id'] = str(item['_id'])
+        return items
+
+    def find_one(self, client, diction, database, collection):
+        if "_id" in diction:
+            diction["_id"] = ObjectId(diction["_id"])
+        if "tags" in diction:
+           self.cast_tags(diction)
+        item = client[database][collection].find_one(diction)
+        if item:
+            item['_id'] = str(item['_id'])
+        return item
+    
+    def cast_tags(self, diction):
+        tags = diction['tags']
+        diction["$or"] = [{"tags": {"$eq": tag}} for tag in tags]
+        del diction["tags"]
+        return diction
 
     def db_closure(self, function, db_params):
         def db_function(*args, **kwargs):
@@ -43,9 +78,6 @@ class db_helper:
                 feedback = function(client, *args, **kwargs)
             finally:
                 client.close()
-            if feedback:
-                return feedback
-            else:
-                return {}
+            return feedback
         return db_function
 
