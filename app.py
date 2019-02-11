@@ -68,7 +68,7 @@ def post():
         if feedback.acknowledged:
             return _list(head='Deleted')
         else:
-            return _list(head='Deletion failed')
+            return _list(head='Deleting failed')
 
     if "list" == command:
         return _list(args)
