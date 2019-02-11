@@ -16,4 +16,32 @@ Install:
 8. Test mongo shell: mongo
 9. Quit mongo shell: exit
 10. Start todo: bash todo or ./todo
-11. Open 127.0.0.1:5000/ and print help in the command field
+11. Open 127.0.0.1:5000/ and print help in the command field or use curl
+
+
+Use API with curl:
+
+Create a new item:
+    curl -X PUT -d '{"name": "<name>",
+    "description": "<description>",
+    "date_deadline": "<YYYY-MM-DD>",
+    "tags": [<tag1>, <tag2>, ..., <tagn>]}' "127.0.0.1:5000/create"
+
+List all items:
+    curl -X GET -d '{}' "127.0.0.1:5000/ls"
+List some special set of items (examples):
+    curl -X GET -d '{"name": "nameless"}' "127.0.0.1:5000/ls" # lists all items with name "nameless"
+    curl -X GET -d '{"tags: ["bla"]"}' "127.0.0.1:5000/ls" # lists with tag "bla"
+    curl -X GET -d '{"tags": ["blas", "das"]}' "127.0.0.1:5000/ls" # lists every item with one of the tags
+"ls" corresponds with "db.collection.find({...}) in MongoDB. Works for all six attributes.
+
+View a specific item:
+    curl -X GET "127.0.0.1:5000/view/<_id>"
+
+Delete a specific item:
+    curl -X DELETE "127.0.0.1:5000/delete/<_id>"
+
+Delete many items:
+    curl -X DELETE -d {...} "127.0.0.1:5000/delete" # deletes a specified by the json -d
+    curl -X DELETE -d {} "127.0.0.1:5000/delete" # empty json -> delete all
+Works like "ls". Corresponds to db.collection.deleteMany({...}) in MongoDB. 
