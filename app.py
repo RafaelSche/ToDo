@@ -1,9 +1,11 @@
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, redirect, url_for
 from helpers import *
 from datetime import datetime
 from bson.objectid import ObjectId
 from dateutil.parser import parse as time_parse
 from argparse import ArgumentError
+from pprint import pprint
+from json import loads, dumps
 
 flask_params = {"port": 5000}
 db_params = {"port": 27017, "host": "localhost"}
@@ -17,22 +19,55 @@ table_template = 'table.html'
 app = Flask(__name__)
 
 
-def _list(args={}, **kwargs):
+def ls_html(args={}, **kwargs):
     feedback = list(db.find(args, **db_names))
     ret = render_template(head_template, **kwargs) + render_template(table_template, rows=feedback)
     return ret
 
-
+#--------------------------------------------------------------------SERVER-----------
 @app.route('/', methods=['GET'])
 def main_page():
-    return _list()
+    return ls_html()
 
+@app.route('/ls', methods=['GET'])
+def ls():
+    args = request.get_json(force=True)
+    feedback = db.find(args, **db_names)
+    return dumps(feedback)
+
+@app.route('/create', methods=['PUT'])
+def create():
+    args = request.get_json(force=True)
+    args['date_created'] = str(datetime.now().date())
+    if "date_deadline" in args:
+        try:
+            args["date_deadline"] = str(time_parse(args["date_deadline"]).date())
+        except ValueError:
+            return "date_deadline_format invalid; try YYYY-MM-DD or see dateutil.parser.parse\n"
+    feedback = db.insert_one(args, **db_names)
+    return str(feedback.acknowledged)
+
+@app.route('/delete', methods=['DELETE'])
+def delete():
+    args = request.get_json(force=True)
+    feedback = db.delete_many(args, **db_names)
+    return str(feedback.acknowledged)
+
+@app.route('/delete/<string:_id>', methods=['DELETE'])
+def delete_one(_id):
+    return str(db.delete_many({'_id': ObjectId(_id)}, **db_names).acknowledged)
+
+@app.route('/view/<string:_id>', methods=['GET'])
+def view(_id):
+    return dumps(db.find_one({'_id': ObjectId(_id)}, **db_names))
+    
+#--------------------------------------------------------------------------------------------------------------------
 
 @app.route('/', methods=['POST'])
-def post():
+def post(command=None):
     command = request.form.get('command')
     if not command:
-        return _list(head='Empty Command')
+        return ls_html(head='Empty Command')
 
     command, args = parse_arguments(command)
 
@@ -46,7 +81,7 @@ def post():
         try:
             args["date_deadline"] = str(time_parse(args["date_deadline"]).date())
         except ValueError as e:
-            return _list(head=str(e))
+            return ls_html(head=str(e))
 
     if "create" == command:
         args['date_created'] = str(datetime.now().date())
@@ -54,33 +89,28 @@ def post():
             del args['_id']
         feedback = db.insert_one(args, **db_names)
         if feedback.acknowledged:
-            return _list(head='Created'+' '+str(args['_id']))
+            return ls_html(head='Created'+' '+str(args['_id']))
         else:
-            return _list(head='Creating failed')
-
-    if "tags" in args:
-        tags = args['tags']
-        args["$or"] = [{"tags": {"$eq": tag}} for tag in tags]
-        del args["tags"]
+            return ls_html(head='Creating failed')
 
     if "delete" == command:
         feedback = db.delete_many(args, **db_names)
         if feedback.acknowledged:
-            return _list(head='Deleted')
+            return ls_html(head='Deleted')
         else:
-            return _list(head='Deleting failed')
+            return ls_html(head='Deleting failed')
 
-    if "list" == command:
-        return _list(args)
+    if "ls" == command:
+        return ls_html(args)
 
     if "view" == command:
         feedback = db.find_one(args, **db_names)
-        list_feedback = list(db.find({}, **db_names))
-        return render_template(head_template, head="view") + render_template(view_template, **feedback) + render_template(table_template, rows=list_feedback)
+        ls_html_feedback = list(db.find({}, **db_names))
+        return render_template(head_template, head="view") + render_template(view_template, **feedback) + render_template(table_template, rows=ls_html_feedback)
 
     if "help" == command:
-        list_feedback = list(db.find({}, **db_names))
-        return render_template(head_template) + render_template(main_template) + render_template(table_template, rows=list_feedback)
+        ls_html_feedback = list(db.find({}, **db_names))
+        return render_template(head_template) + render_template(main_template) + render_template(table_template, rows=ls_html_feedback)
 
     return main_page()
 
