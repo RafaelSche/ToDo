@@ -7,14 +7,14 @@ Install:
 4. Activate the virtualenv:$ source env/bin/activate
 5. Install packages: pip install -r requirements.txt
 6. Install mongodb:  apt-get install mongodb or sudo apt-get install mongodb
-7. Start its daemon process: mongod
+7. Start its daemon process: mongod     
     Maybe you will have to specify another port, if default 27017 is already in use:    
         sudo /etc/init.d/mongodb stop   
         mongod --port <port_number> 
         sudo /etc/init.d/mongodb start   
     Some configuration of the server, including the ports, is available:    
-        in line 10 - server port, in line 11 - DB port, in line 13 names of 
-        the database and the collection, which will be created in MongoDB.  
+        in line 10 - server port, in line 11 - DB port, in line 13 names of         
+        the database and the collection, which will be created in MongoDB.          
 8. Test mongo shell: mongo
 9. Quit mongo shell: exit
 10. Start todo: python3 app.py
@@ -46,5 +46,5 @@ Delete a specific item:
 
 Delete many items:
     curl -X DELETE -d {...} "127.0.0.1:5000/delete" # deletes a specified by the json -d    
-    curl -X DELETE -d {} "127.0.0.1:5000/delete" # empty json -> delete all 
+    curl -X DELETE -d {} "127.0.0.1:5000/delete" # empty json -> delete all         
 Works like "ls". Corresponds to db.collection.deleteMany({...}) in MongoDB. 
