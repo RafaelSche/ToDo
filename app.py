@@ -1,3 +1,11 @@
+"""
+Functions to handle requests on the server are defined here.
+Several of them require a json to specify items in the DB.
+Items a stored in MongoDB as jsons, too.
+A json matches to an item if one of the key-value pairs
+a equal, as in MongoDB, too. 
+"""
+
 from flask import Flask, request, render_template, redirect, url_for
 from helpers import *
 from datetime import datetime
@@ -7,19 +15,25 @@ from argparse import ArgumentError
 from pprint import pprint
 from json import loads, dumps
 
-flask_params = {"port": 5000}
-db_params = {"port": 27017, "host": "localhost"}
+flask_params = {"port": 5000} # server port
+
+db_params = {"port": 27017, "host": "localhost"} # db port and hostname
 db = db_helper(db_params)
-db_names = {"database": "todo", "collection": "items"}
-view_template = 'created.html'
-main_template = 'hello.html'
-head_template = 'head.html'
-table_template = 'table.html'
+db_names = {"database": "todo", "collection": "items"} # names of database and collection
+
+#  names of jinja2 templates 
+view_template = 'created.html' # to show one specific item
+main_template = 'hello.html'    # help page (not main)
+head_template = 'head.html'     # top of all pages, contains the HTML POST form
+table_template = 'table.html'   # table to list items
 
 app = Flask(__name__)
 
 
 def ls_html(args={}, **kwargs):
+    """
+    Helper function to list items in a table. args specifies which items to list. List all if args empty.
+    """
     feedback = list(db.find(args, **db_names))
     ret = render_template(head_template, **kwargs) + render_template(table_template, rows=feedback)
     return ret
@@ -27,16 +41,33 @@ def ls_html(args={}, **kwargs):
 #--------------------------------------------------------------------SERVER-----------
 @app.route('/', methods=['GET'])
 def main_page():
+    """
+    main page: http://localhost:<port>
+    returns the POST field and lists all items.
+    """
     return ls_html()
 
 @app.route('/ls', methods=['GET'])
 def ls():
+    """
+    Handles GET request on http://localhost:<port>/ls
+    Lists items. Which items to list can be specified by a json.
+    Empty json to list all.
+    A json matches to an item if one of the key-value pairs
+    a equal
+    return: json string (list of dictionaries)
+    """
     args = request.get_json(force=True)
     feedback = db.find(args, **db_names)
     return dumps(feedback)
 
 @app.route('/create', methods=['PUT'])
 def create():
+    """
+    Handles PUT request on http://localhost:<port>/create
+    Creates an item: attributes of the item should be specified with json.
+    return: str (bool), True if succesful
+    """
     args = request.get_json(force=True)
     args['date_created'] = str(datetime.now().date())
     if "date_deadline" in args:
@@ -49,22 +80,44 @@ def create():
 
 @app.route('/delete', methods=['DELETE'])
 def delete():
+    """
+    Handles DELETE request on http://localhost:<port>/delete
+    Deletes several items specified by a json.
+    A json matches to an item if one of the key-value pairs
+    a equal
+    return: str(bool), True if succesful
+    """
     args = request.get_json(force=True)
     feedback = db.delete_many(args, **db_names)
     return str(feedback.acknowledged)
 
 @app.route('/delete/<string:_id>', methods=['DELETE'])
 def delete_one(_id):
+    """
+    Handles DELETE request on http://localhost:<port>/delete/<_id>
+    Deletes one item specified by its _id.
+    param: _id
+    return: str(bool), True if succesful
+    """
     return str(db.delete_many({'_id': ObjectId(_id)}, **db_names).acknowledged)
 
 @app.route('/view/<string:_id>', methods=['GET'])
 def view(_id):
+    """
+    Handles DELETE request on http://localhost:<port>/view/<_id>
+    returns  one item specified by its _id.
+    param: _id
+    return: json string (one dictionary), null if not found
+    """
     return dumps(db.find_one({'_id': ObjectId(_id)}, **db_names))
     
 #--------------------------------------------Server HTMLs------------------------------------------------------------------------
 
 @app.route('/', methods=['POST'])
 def post(command=None):
+    """
+    Handles POST request on the main_page. 
+    """
     command = request.form.get('command')
     if not command:
         return ls_html(head='Empty Command')
