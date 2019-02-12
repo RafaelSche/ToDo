@@ -9,9 +9,9 @@ Install:
 6. Install mongodb:  apt-get install mongodb or sudo apt-get install mongodb
 7. Start its daemon process: mongod
     Maybe you will have to specify another port, if default 27017 is already in use:
-        sudo /etc/init.d/mongodb stop 
+        sudo /etc/init.d/mongodb stop   
         mongod --port <port_number> 
-        sudo /etc/init.d/mongodb start 
+        sudo /etc/init.d/mongodb start   
     Some configuration of the server, including the ports, is available: 
         in line 10 - server port, in line 11 - DB port, in line 13 names of
         the database and the collection, which will be created in MongoDB.
