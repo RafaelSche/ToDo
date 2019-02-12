@@ -24,10 +24,10 @@ Install:
 Use the API with curl:
 
 Create a new item:
-    curl -X PUT -d '{"name": "<name>",  
-    "description": "<description>", 
-    "date_deadline": "<YYYY-MM-DD>",    
-    "tags": [<tag1>, <tag2>, ..., <tagn>]}' "127.0.0.1:5000/create"     
+    curl -X PUT -d '{"name": "name",  
+    "description": "description", 
+    "date_deadline": "YYYY-MM-DD",    
+    "tags": [tag1, tag2, ..., tagn]}' "127.0.0.1:5000/create"     
 All parameter in the json are optional. Attribute _id will be set by Mongo DB and date_created by the server.   
 
 List all items:
