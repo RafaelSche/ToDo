@@ -3,7 +3,7 @@ Install:
 
 1. Clone the Github Repository.
 2. Change to the directory ~/ToDo/
-3. Install a virtual Python Enviroment: $ python -m virtualenv env
+3. Install a virtual Python Enviroment: $ python3 -m venv env
 4. Activate the virtualenv:$ source env/bin/activate
 5. Install packages: pip install -r requirements.txt
 6. Install mongodb:  apt-get install mongodb or sudo apt-get install mongodb
