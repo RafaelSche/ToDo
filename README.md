@@ -17,7 +17,7 @@ Install:
         the database and the collection, which will be created in MongoDB.          
 8. Test mongo shell: mongo
 9. Quit mongo shell: exit
-10. Start todo: python3 app.py
+10. Start todo: python3 app.py 
 11. How to use it with curl is shown lower. It also usable with browser: 127.0.0.1:5000
 
 
